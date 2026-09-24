@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard — Access Panel</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="dash-wrap">
+    <div class="dash-header">
+      <div class="brand-mark"><span class="dot"></span>ACCESS PANEL</div>
+      <button class="logout-btn" id="logoutBtn">Sign out</button>
+    </div>
+
+    <div id="content">
+      <div class="loading-state">Verifying session…</div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    const content = document.getElementById('content');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    async function loadProfile() {
+      if (!Auth.getAccessToken()) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      try {
+        const user = await Auth.getProfile();
+        content.innerHTML = `
+          <div class="card">
+            <h2>Welcome, ${escapeHtml(user.name)}</h2>
+            <p class="lead">You're viewing a protected route that required a valid access token.</p>
+            <dl class="kv">
+              <dt>User ID</dt><dd>${escapeHtml(user.id)}</dd>
+              <dt>Email</dt><dd>${escapeHtml(user.email)}</dd>
+              <dt>Role</dt><dd>${escapeHtml(user.role)}</dd>
+              <dt>Joined</dt><dd>${new Date(user.createdAt).toLocaleDateString()}</dd>
+              <dt>Last login</dt><dd>${user.lastLogin ? new Date(user.lastLogin).toLocaleString() : '—'}</dd>
+            </dl>
+          </div>`;
+      } catch (err) {
+        window.location.href = 'index.html';
+      }
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str ?? '';
+      return div.innerHTML;
+    }
+
+    logoutBtn.addEventListener('click', async () => {
+      await Auth.logout();
+      window.location.href = 'index.html';
+    });
+
+    loadProfile();
+  </script>
+</body>
+</html>

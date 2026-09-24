@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Create account — Access Panel</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="layout">
+    <section class="brand-panel">
+      <div class="brand-mark"><span class="dot"></span>ACCESS PANEL</div>
+      <div class="brand-copy">
+        <h1>Set up access in under a minute.</h1>
+        <p>Your password is hashed with bcrypt before it ever touches the database — this server never stores it in plain text.</p>
+      </div>
+      <div class="brand-footnote">bcrypt · JWT · MongoDB · Express</div>
+    </section>
+
+    <section class="form-panel">
+      <div class="form-card">
+        <h2>Create account</h2>
+        <p class="form-sub">Already registered? <a href="index.html">Sign in</a></p>
+
+        <div class="banner" id="banner"></div>
+
+        <form id="signupForm" novalidate>
+          <div class="field" data-field="name">
+            <label for="name">Full name</label>
+            <input type="text" id="name" name="name" placeholder="Jane Doe" autocomplete="name" required />
+            <div class="field-error"></div>
+          </div>
+
+          <div class="field" data-field="email">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required />
+            <div class="field-error"></div>
+          </div>
+
+          <div class="field" data-field="password">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="new-password" required />
+            <div class="password-hint">At least 8 characters, with a letter and a number.</div>
+            <div class="field-error"></div>
+          </div>
+
+          <button type="submit" class="submit" id="submitBtn">Create account</button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    const form = document.getElementById('signupForm');
+    const banner = document.getElementById('banner');
+    const submitBtn = document.getElementById('submitBtn');
+
+    (async () => {
+      if (Auth.getAccessToken()) {
+        window.location.href = 'dashboard.html';
+      }
+    })();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideBanner(banner);
+      clearFieldErrors(form);
+
+      const name = form.name.value.trim();
+      const email = form.email.value.trim();
+      const password = form.password.value;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating account…';
+
+      try {
+        await Auth.signup({ name, email, password });
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        if (err.errors && err.errors.length) {
+          applyServerValidationErrors(form, err);
+        }
+        showBanner(banner, err.message || 'Unable to create account.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create account';
+      }
+    });
+  </script>
+</body>
+</html>

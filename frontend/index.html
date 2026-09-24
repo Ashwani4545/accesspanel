@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign in — Access Panel</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="layout">
+    <section class="brand-panel">
+      <div class="brand-mark"><span class="dot"></span>ACCESS PANEL</div>
+      <div class="brand-copy">
+        <h1>Your credentials, verified in one step.</h1>
+        <p>A minimal reference implementation of email/password authentication — JWT access tokens, httpOnly refresh cookies, hashed passwords, and rate-limited login attempts, backed by MongoDB.</p>
+      </div>
+      <div class="brand-footnote">bcrypt · JWT · MongoDB · Express</div>
+    </section>
+
+    <section class="form-panel">
+      <div class="form-card">
+        <h2>Sign in</h2>
+        <p class="form-sub">New here? <a href="signup.html">Create an account</a></p>
+
+        <div class="banner" id="banner"></div>
+
+        <form id="loginForm" novalidate>
+          <div class="field" data-field="email">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required />
+            <div class="field-error"></div>
+          </div>
+
+          <div class="field" data-field="password">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required />
+            <div class="field-error"></div>
+          </div>
+
+          <button type="submit" class="submit" id="submitBtn">Sign in</button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    const form = document.getElementById('loginForm');
+    const banner = document.getElementById('banner');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // If already logged in, skip straight to the dashboard
+    (async () => {
+      if (Auth.getAccessToken()) {
+        window.location.href = 'dashboard.html';
+      }
+    })();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideBanner(banner);
+      clearFieldErrors(form);
+
+      const email = form.email.value.trim();
+      const password = form.password.value;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing in…';
+
+      try {
+        await Auth.login({ email, password });
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        if (err.errors && err.errors.length) {
+          applyServerValidationErrors(form, err);
+        }
+        showBanner(banner, err.message || 'Unable to sign in.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign in';
+      }
+    });
+  </script>
+</body>
+</html>

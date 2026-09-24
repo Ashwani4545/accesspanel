@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Environment files (contain secrets)
+.env
+*.env
+!.env.example
+!atlas-credentials.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build output
+dist/
+build/
+
+# Editor directories
+.vscode/
+.idea/
