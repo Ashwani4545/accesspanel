@@ -1,0 +1,19 @@
+services:
+
+  mongodb:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
